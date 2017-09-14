@@ -1,0 +1,40 @@
+---
+# Include OS-specific vars
+- name: Include os_family vars
+  include_vars: "{{ ansible_os_family }}.yml"
+  tags: always
+
+- name: "Set Azure subscription ID"
+  local_action: command /usr/bin/az account set --output json --subscription {{ az_builder_subscriptionId | quote }}
+
+- name: "Ensure Azure resource group is created"
+  local_action: command /usr/bin/az group create --output json --name {{ az_builder_deploymentResourceGroup | quote }} --location {{ az_builder_deploymentLocation | quote }}
+  register: azout_group_create
+  until: (azout_group_create.stdout | from_json).properties.provisioningState == 'Succeeded'
+  retries: 5
+  delay: 1
+
+- debug:
+    msg:
+    - "{{ azout_group_create.stdout }}"
+  when: az_builder_debug
+
+- assert:
+   that:
+     - "'Succeeded' in azout_group_create.stdout"
+
+- name: "Initiate ARM template deployments"
+  local_action: |
+    command /usr/bin/az group deployment create
+      --output json
+      --resource-group {{ az_builder_deploymentResourceGroup | quote }}
+      --name {{ item.name | quote }}
+      --template-uri {{ item.url | quote }}
+      --parameters @{{ item.params | quote }}
+  with_items: "{{ az_builder_deployments }}"
+  register: azout_group_deployment_create
+
+- debug:
+    msg:
+    - "{{ azout_group_deployment_create }}"
+  when: az_builder_debug
