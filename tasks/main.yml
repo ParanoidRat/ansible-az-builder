@@ -4,28 +4,43 @@
   include_vars: "{{ ansible_os_family }}.yml"
   tags: always
 
+# Ensure right subscription ID is used
 - name: "Set Azure subscription ID"
-  local_action: command /usr/bin/az account set --output json --subscription {{ az_builder_subscriptionId | quote }}
+  local_action: |
+    command /usr/bin/az
+    account set
+      --output json
+      --subscription {{ az_builder_subscriptionId | quote }}
 
+# Create required Resource Group if does not exist
 - name: "Ensure Azure resource group is created"
-  local_action: command /usr/bin/az group create --output json --name {{ az_builder_deploymentResourceGroup | quote }} --location {{ az_builder_deploymentLocation | quote }}
+  local_action: |
+    command /usr/bin/az
+    group create
+      --output json
+      --name {{ az_builder_deploymentResourceGroup | quote }}
+      --location {{ az_builder_deploymentLocation | quote }}
   register: azout_group_create
   until: (azout_group_create.stdout | from_json).properties.provisioningState == 'Succeeded'
   retries: 5
   delay: 1
 
+# Fail if Resource Group is not in correct provisioning state
+- assert:
+   that:
+     - "'Succeeded' in azout_group_create.stdout"
+
+# DEBUG
 - debug:
     msg:
     - "{{ azout_group_create.stdout }}"
   when: az_builder_debug
 
-- assert:
-   that:
-     - "'Succeeded' in azout_group_create.stdout"
-
+# Iterate through ARM templates deploying one by one
 - name: "Initiate ARM template deployments"
   local_action: |
-    command /usr/bin/az group deployment create
+    command /usr/bin/az
+    group deployment create
       --output json
       --resource-group {{ az_builder_deploymentResourceGroup | quote }}
       --name {{ item.name | quote }}
@@ -34,6 +49,7 @@
   with_items: "{{ az_builder_deployments }}"
   register: azout_group_deployment_create
 
+# DEBUG
 - debug:
     msg:
     - "{{ azout_group_deployment_create }}"
