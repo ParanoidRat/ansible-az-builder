@@ -11,7 +11,7 @@
     account set
       --output json
       --subscription {{ az_builder_subscriptionId | quote }}
-  tags: az-builder_subscription
+  tags: az-builder-subscription
 
 # Create required Resource Group if does not exist
 - name: "Ensure Azure resource group is created"
@@ -25,20 +25,20 @@
   until: (azout_group_create.stdout | from_json).properties.provisioningState == 'Succeeded'
   retries: 5
   delay: 1
-  tags: az-builder_resgroup
+  tags: az-builder-resgroup
 
 # Fail if Resource Group is not in correct provisioning state
 - assert:
    that:
      - "'Succeeded' in azout_group_create.stdout"
-  tags: az-builder_resgroup
+  tags: az-builder-resgroup
 
 # DEBUG
 - debug:
     msg:
     - "{{ azout_group_create.stdout }}"
   when: az_builder_debug
-  tags: az-builder_resgroup
+  tags: az-builder-resgroup
 
 # Iterate through ARM templates deploying one by one
 - name: "Initiate ARM template deployments"
@@ -52,11 +52,11 @@
       --parameters @{{ item.params | quote }}
   with_items: "{{ az_builder_deployments }}"
   register: azout_group_deployment_create
-  tags: az-builder_deploy
+  tags: az-builder-deploy
 
 # DEBUG
 - debug:
     msg:
     - "{{ azout_group_deployment_create }}"
   when: az_builder_debug
-  tags: az-builder_deploy
+  tags: az-builder-deploy
