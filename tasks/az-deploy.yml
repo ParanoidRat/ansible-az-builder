@@ -1,0 +1,67 @@
+# Deploys an ARM template to pre-defined subscription, location and
+# Resource Group
+#
+#  Usage example
+#
+#   tasks:
+#     - include: az-deploy.yml
+#       vars:
+#         az_deploy_name: Cisco-CSR-1000V
+#         az_deploy_url: https://github.com/Azure/azure-quickstart-templates/blob/master/cisco-csr-1000v/azuredeploy.json
+#         az_deploy_params: azuredeploy.parameters.cisco-csr-1000v.json
+#         az_deploy_subscriptionId: af95b82a-3fbf-45fd-b6bd-b6c62ea8b5b4
+#         az_deploy_location: West Europe
+#         az_deploy_resgroup: VPN
+#
+---
+# Ensure right subscription ID is used
+- name: "Set Azure subscription ID"
+  local_action: |
+    command /usr/bin/az
+    account set
+      --output json
+      --subscription {{ az_deploy_subscriptionId | quote }}
+
+# Create required Resource Group if does not exist
+- name: "Ensure Azure resource group is created"
+  local_action: |
+    command /usr/bin/az
+    group create
+      --output json
+      --name {{ az_deploy_resgroup | quote }}
+      --location {{ az_deploy_location | quote }}
+  register: azout_group_create
+  until: (azout_group_create.stdout | from_json).properties.provisioningState == 'Succeeded'
+  retries: 5
+  delay: 1
+
+# Fail if Resource Group is not in correct provisioning state
+- assert:
+   that:
+     - "'Succeeded' in azout_group_create.stdout"
+
+# DEBUG
+- debug:
+    msg:
+    - "{{ azout_group_create.stdout }}"
+  when: az_builder_debug
+  tags: debug
+
+# Deploy to subscription, resource group and location defined above
+- name: "Deploy ARM template"
+  local_action: |
+    command /usr/bin/az
+    group deployment create
+      --output json
+      --resource-group {{ az_deploy_resgroup | quote }}
+      --name {{ az_deploy_name | quote }}
+      --template-uri {{ az_deploy_url | quote }}
+      --parameters @{{ az_deploy_params | quote }}
+  register: azout_group_deployment_create
+
+# DEBUG
+- debug:
+    msg:
+    - "{{ azout_group_deployment_create }}"
+  when: az_builder_debug
+  tags: debug

@@ -4,15 +4,9 @@ az_builder_deployments:
   - name: "Cisco-CSR-1000V"
     url: https://github.com/Azure/azure-quickstart-templates/blob/master/cisco-csr-1000v/azuredeploy.json
     params: azuredeploy.parameters.cisco-csr-1000v.json
-
-# Azure Subscription for deployment
-az_builder_subscriptionId: af95b82a-3fbf-45fd-b6bd-b6c62ea8b5b4
-
-# Azure location to deploy
-az_builder_deploymentLocation: West Europe
-
-# Azure resource group to deploy
-az_builder_deploymentResourceGroup: DEV-GROUP
+    subscriptionId: af95b82a-3fbf-45fd-b6bd-b6c62ea8b5b4
+    location: West Europe
+    resgroup: DEV-VPN
 
 # Enable or disable debug output
-az_builder_debug: true
+az_builder_debug: yes
