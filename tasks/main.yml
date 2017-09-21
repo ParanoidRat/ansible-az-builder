@@ -5,7 +5,7 @@
   tags: always
 
 # Iterate through list of deployments
-- include: az-deploy.yml
+- include_tasks: az-deploy.yml
   vars:
     az_deploy_name: "{{ item.name }}"
     az_deploy_url: "{{ item.url }}"

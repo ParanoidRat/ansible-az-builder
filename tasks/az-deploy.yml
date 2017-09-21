@@ -4,7 +4,7 @@
 #  Usage example
 #
 #   tasks:
-#     - include: az-deploy.yml
+#     - import_tasks: az-deploy.yml
 #       vars:
 #         az_deploy_name: Cisco-CSR-1000V
 #         az_deploy_url: https://github.com/Azure/azure-quickstart-templates/blob/master/cisco-csr-1000v/azuredeploy.json
