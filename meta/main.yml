@@ -1,9 +1,9 @@
 ---
 galaxy_info:
-  author: Paranoid Rat
-  description: Role for a single server to deploy Azure Resource Manager templates with Azure CLI
+  author: ParanoidRat
+  description: Role to deploy Azure Resource Manager templates with Azure CLI from localhost
   license:  Creative Commons Attribution-ShareAlike 4.0 International
-  min_ansible_version: 2.1
+  min_ansible_version: 2.4
   platforms:
     - name: CentOS
       versions:
