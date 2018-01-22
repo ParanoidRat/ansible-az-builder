@@ -3,12 +3,12 @@ This repository contains Ansible role for deployment of resources into Azure. Re
 modules from [ParanoidRat/ansible-common-tasks][1].
 
 ## Getting Started
-1.  Download tasks repo into the folder with playbooks:
+1.  Download repo into the folder with roles
 ```bash
-git clone https://github.com/ParanoidRat/ansible-az-builder.git
+git clone https://github.com/ParanoidRat/ansible-az-builder.git roles/az-builder
 ```
 
-2.  Use in a playbook:
+2.  Use role in a playbook
 ```yaml
 - name: "Deploy to Azure :: Docker"
   hosts: az-builder
